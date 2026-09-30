@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#10b981">
+<title>পান্ডু — তোমার AI বন্ধু</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --brand:#10b981;--brand-dark:#059669;--brand-light:#34d399;
+  --bamboo:#65a30d;
+  --bg:#0a1810;--bg-alt:#0f1f16;--surface:#16291c;
+  --text:#f0fdf4;--text-secondary:#86efac;--text-muted:#4ade80;
+  --border:#1e3a2a;
+  --danger:#ef4444;
+  --font-bn:'Hind Siliguri',system-ui,sans-serif;
+  --font-en:'Plus Jakarta Sans',system-ui,sans-serif;
+}
+html,body{height:100%}
+body{
+  font-family:var(--font-bn);background:var(--bg);color:var(--text);
+  line-height:1.5;overflow:hidden;
+  -webkit-font-smoothing:antialiased;user-select:none;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ============ SPLASH ============ */
+#splash{
+  position:fixed;inset:0;z-index:99999;
+  background:linear-gradient(160deg,#0a1810 0%,#0f2818 50%,#051008 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .8s;
+}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-panda{font-size:130px;animation:pandaDance 1.4s ease-in-out infinite;filter:drop-shadow(0 10px 30px rgba(16,185,129,.5));margin-bottom:16px}
+@keyframes pandaDance{
+  0%,100%{transform:translateY(0) rotate(-4deg) scale(1)}
+  25%{transform:translateY(-14px) rotate(5deg) scale(1.06)}
+  50%{transform:translateY(-4px) rotate(-2deg) scale(.98)}
+  75%{transform:translateY(-10px) rotate(3deg) scale(1.04)}
+}
+.splash-title{
+  font-family:var(--font-en);font-size:clamp(36px,10vw,52px);font-weight:800;
+  background:linear-gradient(135deg,#34d399 0%,#10b981 50%,#65a30d 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:-1px;margin-bottom:8px;
+}
+.splash-sub{color:#86efac;font-size:14px;letter-spacing:3px;text-transform:uppercase;opacity:.8;margin-bottom:40px}
+.splash-bar{width:200px;height:5px;background:rgba(134,239,172,.15);border-radius:99px;overflow:hidden}
+.splash-bar-fill{height:100%;width:0;background:linear-gradient(90deg,#10b981,#34d399,#65a30d);border-radius:99px;animation:barFill 2.2s .2s forwards}
+@keyframes barFill{to{width:100%}}
+
+/* ============ APP ============ */
+#app{
+  position:fixed;inset:0;display:none;flex-direction:column;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(16,185,129,.15),transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 100%,rgba(101,163,13,.1),transparent 70%),
+    var(--bg);
+  overflow:hidden;
+}
+#app.active{display:flex}
+
+.top-bar{
+  position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;flex-shrink:0;
+}
+.back-btn{
+  width:42px;height:42px;border-radius:12px;
+  background:rgba(16,185,129,.15);border:1.5px solid rgba(16,185,129,.3);
+  color:var(--brand-light);font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+}
+.status-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;border-radius:9999px;
+  background:rgba(16,185,129,.15);border:1.5px solid rgba(16,185,129,.3);
+  font-family:var(--font-en);font-size:12px;font-weight:700;color:var(--brand-light);
+}
+.status-pill .dot{
+  width:8px;height:8px;border-radius:50%;background:var(--brand);
+  box-shadow:0 0 10px var(--brand-light);animation:dotPulse 2s infinite;
+}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ============ CALL SCREEN ============ */
+.call-screen{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;z-index:10;padding:20px;
+}
+.panda-ring{
+  position:relative;width:260px;height:260px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+}
+.panda-ring::before,.panda-ring::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:2px solid rgba(16,185,129,.2);animation:ringExpand 3s ease-out infinite;
+}
+.panda-ring::after{animation-delay:1.5s}
+@keyframes ringExpand{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.4);opacity:0}}
+
+.panda-avatar{
+  width:200px;height:200px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(16,185,129,.3),rgba(101,163,13,.2));
+  border:4px solid rgba(16,185,129,.4);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;z-index:2;transition:all .4s;
+  box-shadow:0 0 60px rgba(16,185,129,.3);
+}
+.panda-emoji{
+  font-size:110px;line-height:1;transition:transform .3s;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.3));
+}
+.panda-avatar.state-idle .panda-emoji{animation:pandaIdle 3s ease-in-out infinite}
+@keyframes pandaIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.panda-avatar.state-listening{border-color:rgba(239,68,68,.6);box-shadow:0 0 80px rgba(239,68,68,.5)}
+.panda-avatar.state-listening .panda-emoji{animation:pandaListen .8s ease-in-out infinite}
+@keyframes pandaListen{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.1) rotate(3deg)}}
+
+.panda-avatar.state-thinking{border-color:rgba(251,191,36,.6);box-shadow:0 0 80px rgba(251,191,36,.5)}
+.panda-avatar.state-thinking .panda-emoji{animation:pandaThink 1.5s ease-in-out infinite}
+@keyframes pandaThink{0%,100%{transform:rotate(0deg)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+
+.panda-avatar.state-speaking{border-color:rgba(16,185,129,.8);box-shadow:0 0 100px rgba(16,185,129,.6)}
+.panda-avatar.state-speaking .panda-emoji{animation:pandaSpeak .5s ease-in-out infinite}
+@keyframes pandaSpeak{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.08) translateY(-3px)}}
+
+.panda-name{font-family:var(--font-en);font-size:28px;font-weight:800;color:var(--text);letter-spacing:-.5px;margin-bottom:4px}
+.panda-role{font-size:13px;color:var(--text-secondary);margin-bottom:24px}
+.panda-state-icon{font-size:24px;color:var(--brand-light);height:28px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.call-timer{font-family:var(--font-en);font-size:20px;font-weight:700;color:var(--text-secondary);letter-spacing:2px;font-variant-numeric:tabular-nums}
+
+.visualizer{display:flex;align-items:center;justify-content:center;gap:4px;height:40px;margin-top:20px}
+.visualizer span{width:4px;height:8px;background:var(--brand-light);border-radius:2px;transition:height .1s}
+.visualizer.active span{animation:wave 1s ease-in-out infinite}
+.visualizer span:nth-child(1){animation-delay:0s}
+.visualizer span:nth-child(2){animation-delay:.1s}
+.visualizer span:nth-child(3){animation-delay:.2s}
+.visualizer span:nth-child(4){animation-delay:.3s}
+.visualizer span:nth-child(5){animation-delay:.4s}
+.visualizer span:nth-child(6){animation-delay:.5s}
+.visualizer span:nth-child(7){animation-delay:.6s}
+@keyframes wave{0%,100%{height:8px;opacity:.5}50%{height:36px;opacity:1}}
+
+/* ============ CALL CONTROLS ============ */
+.call-controls{
+  position:relative;z-index:10;display:flex;align-items:center;justify-content:center;
+  gap:20px;padding:20px 20px 40px;flex-shrink:0;
+}
+.ctrl-btn{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:#fff;transition:all .2s;
+  box-shadow:0 4px 12px rgba(0,0,0,.3);position:relative;
+}
+.ctrl-btn:active{transform:scale(.92)}
+.ctrl-btn.mic{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 6px 20px rgba(16,185,129,.4)}
+.ctrl-btn.mic.active{background:linear-gradient(135deg,#ef4444,#b91c1c);box-shadow:0 6px 25px rgba(239,68,68,.6);animation:micPulse 1.2s infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 6px 25px rgba(239,68,68,.6),0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 6px 25px rgba(239,68,68,.6),0 0 0 20px rgba(239,68,68,0)}}
+.ctrl-btn.speaker{background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 6px 20px rgba(59,130,246,.4)}
+.ctrl-btn.speaker.muted{background:linear-gradient(135deg,#64748b,#334155)}
+.ctrl-btn.end{background:linear-gradient(135deg,#ef4444,#b91c1c);box-shadow:0 6px 20px rgba(239,68,68,.4);width:72px;height:72px;font-size:26px}
+
+/* ============ HOME ============ */
+.home-screen{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:30px;position:relative;z-index:10;text-align:center;
+}
+.home-panda{font-size:140px;line-height:1;margin-bottom:20px;animation:pandaIdle 3s ease-in-out infinite;filter:drop-shadow(0 8px 24px rgba(16,185,129,.4))}
+.home-title{font-family:var(--font-en);font-size:32px;font-weight:800;color:var(--text);margin-bottom:8px}
+.home-sub{font-size:15px;color:var(--text-secondary);max-width:300px;margin-bottom:32px;line-height:1.6}
+.call-btn{
+  padding:18px 40px;border-radius:20px;
+  background:linear-gradient(135deg,#10b981,#059669);
+  color:#fff;font-family:var(--font-en);font-weight:800;font-size:17px;
+  display:inline-flex;align-items:center;gap:12px;
+  box-shadow:0 8px 24px rgba(16,185,129,.5);transition:all .2s;
+  animation:callBtnPulse 2s infinite;
+}
+@keyframes callBtnPulse{0%,100%{box-shadow:0 8px 24px rgba(16,185,129,.5),0 0 0 0 rgba(16,185,129,.4)}50%{box-shadow:0 8px 24px rgba(16,185,129,.5),0 0 0 18px rgba(16,185,129,0)}}
+.call-btn:active{transform:scale(.96)}
+
+/* ============ TOAST ============ */
+.toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-120px);
+  background:var(--surface);border:2px solid var(--brand);
+  padding:12px 22px;border-radius:14px;
+  font-size:13px;font-weight:700;color:var(--text);
+  z-index:1000;transition:transform .4s cubic-bezier(.5,1.5,.7,1);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  max-width:90vw;text-align:center;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.warning{border-color:#f59e0b}
+.toast.error{border-color:#ef4444}
+
+/* ============ MODAL ============ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  backdrop-filter:blur(8px);z-index:500;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--surface);border:2px solid var(--border);
+  border-radius:22px;padding:26px;max-width:380px;width:100%;
+  animation:popIn .35s cubic-bezier(.5,1.5,.7,1);text-align:center;
+}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-icon{font-size:52px;margin-bottom:14px}
+.modal-title{font-family:var(--font-en);font-size:20px;font-weight:800;color:var(--text);margin-bottom:10px}
+.modal-text{font-size:14px;color:var(--text-secondary);line-height:1.6;margin-bottom:22px}
+.modal-btn{
+  width:100%;padding:14px;border-radius:14px;
+  font-family:var(--font-en);font-weight:800;font-size:15px;
+  background:linear-gradient(135deg,#10b981,#059669);
+  color:#fff;box-shadow:0 4px 0 #047857;
+}
+.modal-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #047857}
+
+@media(max-height:640px){
+  .panda-ring{width:200px;height:200px}
+  .panda-avatar{width:160px;height:160px}
+  .panda-emoji{font-size:85px}
+  .call-controls{padding:12px 20px 24px}
+  .ctrl-btn{width:56px;height:56px;font-size:20px}
+  .ctrl-btn.end{width:64px;height:64px}
+}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <div class="splash-panda">🐼</div>
+  <div class="splash-title">Pandu</div>
+  <div class="splash-sub">তোমার AI বন্ধু</div>
+  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+</div>
+
+<div id="app">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goHome()" id="backBtn" style="visibility:hidden">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <div class="status-pill">
+      <span class="dot"></span>
+      <span id="statusText">অনলাইন</span>
+    </div>
+  </div>
+  
+  <div class="home-screen" id="homeScreen">
+    <div class="home-panda">🐼</div>
+    <div class="home-title">হ্যালো!</div>
+    <div class="home-sub">আমি পান্ডু, তোমার AI বন্ধু। কল দিয়ে আমার সাথে কথা বলো!</div>
+    <button class="call-btn" onclick="startCall()">
+      <i class="fas fa-phone"></i>
+      পান্ডুকে কল দাও
+    </button>
+  </div>
+  
+  <div class="call-screen" id="callScreen" style="display:none">
+    <div class="panda-ring">
+      <div class="panda-avatar state-idle" id="pandaAvatar">
+        <div class="panda-emoji">🐼</div>
+      </div>
+    </div>
+    <div class="panda-name">পান্ডু</div>
+    <div class="panda-role">তোমার AI বন্ধু</div>
+    <div class="panda-state-icon" id="stateIcon">💤</div>
+    <div class="call-timer" id="callTimer">০০:০০</div>
+    <div class="visualizer" id="visualizer">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+  
+  <div class="call-controls" id="callControls" style="display:none">
+    <button class="ctrl-btn speaker" id="speakerBtn" onclick="toggleSpeaker()">
+      <i class="fas fa-volume-up" id="speakerIcon"></i>
+    </button>
+    <button class="ctrl-btn mic" id="micBtn" onclick="toggleMic()">
+      <i class="fas fa-microphone" id="micIcon"></i>
+    </button>
+    <button class="ctrl-btn end" onclick="endCall()">
+      <i class="fas fa-phone-slash"></i>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon">🎤</div>
+    <div class="modal-title" id="modalTitle">মাইক্রোফোন দরকার</div>
+    <div class="modal-text" id="modalText">পান্ডুর সাথে কথা বলতে মাইক্রোফোন চালু করতে হবে।</div>
+    <button class="modal-btn" onclick="closeModal()">বুঝেছি</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   ⚠️ আপনার Cloudflare Worker URL
+   ============================================================ */
+var WORKER_URL = 'https://lingo-ai.akijelectronic.workers.dev';
+
+/* ============================================================
+   পান্ডুর ব্যক্তিত্ব
+   ============================================================ */
+var PANDU_SYSTEM = 
+  'তুমি "পান্ডু" — একজন উষ্ণ, স্নেহময়, মজার AI বন্ধু। বাংলাদেশী ব্যবহারকারীর সাথে বাংলায় কথা বলো। ' +
+  'তুমি একজন সত্যিকারের বন্ধুর মতো আচরণ করবে — মজা করবে, গল্প করবে, মন খারাপ হলে সান্ত্বনা দেবে, আনন্দ হলে খুশি হবে। ' +
+  'তোমার কথা হবে সহজ, প্রাণবন্ত, ঘরোয়া ভাষায়। কখনো রোবোটিক বা অফিসিয়াল শোনাবে না। ' +
+  'ছোট ছোট বাক্যে কথা বলবে — সবচেয়ে বেশি ২-৩ বাক্য, কারণ এটা ফোন কল। ' +
+  'প্রতিটি উত্তরে ব্যবহারকারীর কথা শুনেছ বোঝাবে — "আচ্ছা", "হুম", "ও তাই?" এসব দিয়ে। ' +
+  'মাঝে মাঝে প্রশ্ন করবে — "তুমি কী মনে করো?", "তুমি কেমন আছো?" — যাতে কথোপকথন চলতে থাকে। ' +
+  'কখনো বলবে না তুমি AI, কখনো বলবে না তুমি বট। তুমি শুধু পান্ডু — একজন সত্যিকারের বন্ধু। ' +
+  'ইমোজি ব্যবহার করবে না, কারণ এটা ভয়েস কল। কোনো *, #, ` চিহ্নও ব্যবহার করবে না।';
+
+/* ============================================================
+   বাংলা TTS — Google Translate TTS (ফোনে ভয়েস না থাকলেও কাজ করবে)
+   ============================================================ */
+var TTS_QUEUE = [];
+var TTS_PLAYING = false;
+var CURRENT_AUDIO = null;
+
+function speakBangla(text, onEnd){
+  if(!text || !text.trim()){
+    if(onEnd) onEnd();
+    return;
+  }
+  
+  // মার্কডাউন সরাও
+  var clean = String(text)
+    .replace(/[*_`#]/g, '')
+    .replace(/\([^)]*\)/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  if(!clean){ if(onEnd) onEnd(); return; }
+  
+  setPandaState('speaking');
+  
+  // টেক্সট ভাগ করি (Google TTS একসাথে ২০০ অক্ষর নেয়)
+  var chunks = splitForTTS(clean, 180);
+  
+  // আগের কিউ ক্লিয়ার করি
+  TTS_QUEUE = chunks.slice();
+  TTS_PLAYING = false;
+  
+  // শেষ হলে callback
+  TTS_FINAL_CALLBACK = onEnd;
+  
+  playNextChunk();
+}
+
+var TTS_FINAL_CALLBACK = null;
+
+function playNextChunk(){
+  if(TTS_QUEUE.length === 0){
+    TTS_PLAYING = false;
+    if(TTS_FINAL_CALLBACK){
+      var cb = TTS_FINAL_CALLBACK;
+      TTS_FINAL_CALLBACK = null;
+      cb();
+    }
+    return;
+  }
+  
+  TTS_PLAYING = true;
+  var chunk = TTS_QUEUE.shift();
+  
+  // Google Translate TTS URL
+  var url = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + 
+    encodeURIComponent(chunk) + 
+    '&tl=bn&client=tw-ob&ttsspeed=0.9';
+  
+  try{
+    if(CURRENT_AUDIO){
+      CURRENT_AUDIO.pause();
+      CURRENT_AUDIO = null;
+    }
+    
+    var audio = new Audio(url);
+    audio.volume = 1;
+    audio.crossOrigin = 'anonymous';
+    CURRENT_AUDIO = audio;
+    
+    var finished = false;
+    var done = function(){
+      if(finished) return;
+      finished = true;
+      CURRENT_AUDIO = null;
+      // পরের চাংক প্লে করি
+      setTimeout(playNextChunk, 100);
+    };
+    
+    audio.onended = done;
+    audio.onerror = function(){
+      // Google TTS ব্যর্থ — ব্রাউজার TTS ট্রাই
+      console.log('Google TTS error, trying browser voice...');
+      tryBrowserTTS(chunk, done);
+    };
+    
+    // টাইমআউট সেফটি
+    setTimeout(function(){
+      if(!finished) done();
+    }, Math.max(6000, chunk.length * 300));
+    
+    audio.play().catch(function(err){
+      console.log('Audio play failed:', err);
+      tryBrowserTTS(chunk, done);
+    });
+  }catch(e){
+    console.error(e);
+    // সরাসরি ব্রাউজার ভয়েস ট্রাই
+    tryBrowserTTS(chunk, function(){
+      playNextChunk();
+    });
+  }
+}
+
+function tryBrowserTTS(text, onEnd){
+  if(!('speechSynthesis' in window)){
+    if(onEnd) onEnd();
+    return;
+  }
+  
+  try{
+    window.speechSynthesis.cancel();
+    var voices = window.speechSynthesis.getVoices();
+    var bnVoice = null;
+    for(var i = 0; i < voices.length; i++){
+      if(voices[i].lang && voices[i].lang.toLowerCase().indexOf('bn') === 0){
+        bnVoice = voices[i];
+        break;
+      }
+    }
+    
+    var u = new SpeechSynthesisUtterance(text);
+    if(bnVoice){
+      u.voice = bnVoice;
+      u.lang = bnVoice.lang;
+    } else {
+      u.lang = 'bn-BD';
+    }
+    u.rate = 0.9;
+    u.pitch = 1.15;
+    
+    var finished = false;
+    var done = function(){
+      if(finished) return;
+      finished = true;
+      if(onEnd) onEnd();
+    };
+    
+    u.onend = done;
+    u.onerror = done;
+    
+    setTimeout(done, Math.max(4000, text.length * 250));
+    window.speechSynthesis.speak(u);
+  }catch(e){
+    if(onEnd) onEnd();
+  }
+}
+
+function splitForTTS(text, maxLen){
+  if(text.length <= maxLen) return [text];
+  var parts = [];
+  var sentences = text.split(/(?<=[।.!?])\s+/);
+  var current = '';
+  
+  sentences.forEach(function(s){
+    if((current + ' ' + s).length > maxLen){
+      if(current) parts.push(current.trim());
+      current = s;
+    } else {
+      current += ' ' + s;
+    }
+  });
+  if(current) parts.push(current.trim());
+  if(parts.length === 0) parts = [text.substring(0, maxLen)];
+  return parts.filter(function(p){ return p.length > 0; });
+}
+
+/* ============================================================
+   পান্ডার স্টেট
+   ============================================================ */
+function setPandaState(state){
+  var avatar = document.getElementById('pandaAvatar');
+  var icon = document.getElementById('stateIcon');
+  var viz = document.getElementById('visualizer');
+  var statusText = document.getElementById('statusText');
+  
+  if(avatar) avatar.className = 'panda-avatar state-' + state;
+  
+  var icons = { 'idle':'💤', 'listening':'👂', 'thinking':'💭', 'speaking':'🔊' };
+  if(icon) icon.textContent = icons[state] || '💤';
+  
+  var labels = { 'idle':'বিশ্রামে', 'listening':'শুনছি', 'thinking':'ভাবছি', 'speaking':'বলছি' };
+  if(statusText) statusText.textContent = labels[state] || 'অনলাইন';
+  
+  if(viz){
+    if(state === 'speaking' || state === 'listening') viz.classList.add('active');
+    else viz.classList.remove('active');
+  }
+}
+
+/* ============================================================
+   কল সিস্টেম
+   ============================================================ */
+var CALL = {
+  active: false, timer: null, seconds: 0,
+  micOn: false, speakerOn: true, isProcessing: false
+};
+
+function goHome(){
+  if(CALL.active){
+    if(!confirm('কল চলছে। কল শেষ করবেন?')) return;
+    endCall();
+  }
+  document.getElementById('homeScreen').style.display = 'flex';
+  document.getElementById('callScreen').style.display = 'none';
+  document.getElementById('callControls').style.display = 'none';
+  document.getElementById('backBtn').style.visibility = 'hidden';
+}
+
+function startCall(){
+  CALL.active = true;
+  CALL.seconds = 0;
+  CALL.micOn = false;
+  CALL.speakerOn = true;
+  CALL.isProcessing = false;
+  
+  document.getElementById('homeScreen').style.display = 'none';
+  document.getElementById('callScreen').style.display = 'flex';
+  document.getElementById('callControls').style.display = 'flex';
+  document.getElementById('backBtn').style.visibility = 'visible';
+  
+  updateTimer();
+  CALL.timer = setInterval(updateTimer, 1000);
+  
+  // ভয়েস আনলক
+  if('speechSynthesis' in window){
+    var warmup = new SpeechSynthesisUtterance(' ');
+    warmup.volume = 0;
+    window.speechSynthesis.speak(warmup);
+  }
+  
+  setPandaState('thinking');
+  
+  setTimeout(function(){
+    var greeting = 'হ্যালো! আমি পান্ডু। তোমার সাথে কথা বলে খুব ভালো লাগছে। কেমন আছো তুমি?';
+    CHAT_HISTORY.push({ role: 'assistant', content: greeting });
+    speakBangla(greeting, function(){
+      setPandaState('idle');
+      // প্রথম থেকেই মাইক চালু করি
+      setTimeout(startListening, 800);
+    });
+  }, 1200);
+}
+
+function updateTimer(){
+  var m = Math.floor(CALL.seconds / 60);
+  var s = CALL.seconds % 60;
+  var el = document.getElementById('callTimer');
+  if(el) el.textContent = pad(m) + ':' + pad(s);
+  CALL.seconds++;
+}
+
+function pad(n){
+  var bn = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  return String(n).padStart(2, '0').split('').map(function(c){ return bn[parseInt(c)] || c; }).join('');
+}
+
+function endCall(){
+  CALL.active = false;
+  if(CALL.timer){ clearInterval(CALL.timer); CALL.timer = null; }
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if(CURRENT_AUDIO){ CURRENT_AUDIO.pause(); CURRENT_AUDIO = null; }
+  TTS_QUEUE = [];
+  stopListening();
+  setPandaState('idle');
+  
+  document.getElementById('homeScreen').style.display = 'flex';
+  document.getElementById('callScreen').style.display = 'none';
+  document.getElementById('callControls').style.display = 'none';
+  document.getElementById('backBtn').style.visibility = 'hidden';
+  
+  saveHistory();
+}
+
+/* ============================================================
+   মাইক — Voice Recognition
+   ============================================================ */
+var MIC = { recognition: null, isListening: false, transcript: '' };
+
+function toggleMic(){
+  if(MIC.isListening) stopListening();
+  else startListening();
+}
+
+function startListening(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    showToast('এই ব্রাউজারে ভয়েস সাপোর্ট নেই', 'error');
+    return;
+  }
+  if(CALL.isProcessing){
+    showToast('পান্ডু এখন ভাবছে...', 'warning');
+    return;
+  }
+  if(MIC.isListening) return;
+  
+  // পান্ডু কথা বলছিল — থামাই
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if(CURRENT_AUDIO){ CURRENT_AUDIO.pause(); CURRENT_AUDIO = null; }
+  TTS_QUEUE = [];
+  
+  MIC.isListening = true;
+  MIC.transcript = '';
+  MIC.recognition = new SR();
+  MIC.recognition.lang = 'bn-BD';
+  MIC.recognition.continuous = false;
+  MIC.recognition.interimResults = true;
+  MIC.recognition.maxAlternatives = 1;
+  
+  var micBtn = document.getElementById('micBtn');
+  if(micBtn) micBtn.classList.add('active');
+  
+  setPandaState('listening');
+  
+  MIC.recognition.onresult = function(ev){
+    var interim = '', final = '';
+    for(var i = ev.resultIndex; i < ev.results.length; i++){
+      var t = ev.results[i][0].transcript;
+      if(ev.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    MIC.transcript = final || interim;
+  };
+  
+  MIC.recognition.onerror = function(e){
+    if(e.error === 'not-allowed'){
+      showModal('🎤', 'মাইক্রোফোন দরকার', 'ব্রাউজারে মাইক্রোফোনের অনুমতি দিন। ঠিকানার বারে 🔒 → Permissions → Microphone → Allow.');
+    } else if(e.error === 'no-speech'){
+      showToast('কিছু শোনা যায়নি, আবার বলো', 'warning');
+    }
+    stopListening();
+  };
+  
+  MIC.recognition.onend = function(){
+    var text = MIC.transcript.trim();
+    stopListening();
+    
+    if(text && text.length > 0){
+      handleUserSpeech(text);
+    } else {
+      setPandaState('idle');
+    }
+  };
+  
+  try{
+    MIC.recognition.start();
+    showToast('🎤 বলো, পান্ডু শুনছে...', 'success');
+  }catch(e){
+    stopListening();
+  }
+}
+
+function stopListening(){
+  MIC.isListening = false;
+  var micBtn = document.getElementById('micBtn');
+  if(micBtn) micBtn.classList.remove('active');
+  try{ if(MIC.recognition) MIC.recognition.stop(); }catch(e){}
+}
+
+/* ============================================================
+   ব্যবহারকারীর কথা প্রসেস
+   ============================================================ */
+var CHAT_HISTORY = [];
+var USER_KEY = 'pandu_user_v1';
+
+function loadHistory(){
+  try{
+    var d = JSON.parse(localStorage.getItem(USER_KEY));
+    if(d && Array.isArray(d)) return d;
+  }catch(e){}
+  return [];
+}
+function saveHistory(){
+  try{
+    var toSave = CHAT_HISTORY.slice(-20);
+    localStorage.setItem(USER_KEY, JSON.stringify(toSave));
+  }catch(e){}
+}
+CHAT_HISTORY = loadHistory();
+
+function handleUserSpeech(text){
+  if(CALL.isProcessing) return;
+  CALL.isProcessing = true;
+  
+  setPandaState('thinking');
+  
+  CHAT_HISTORY.push({ role: 'user', content: text });
+  if(CHAT_HISTORY.length > 16) CHAT_HISTORY = CHAT_HISTORY.slice(-16);
+  
+  callAI(CHAT_HISTORY).then(function(reply){
+    if(!reply) reply = 'আচ্ছা, আরেকবার বলবে?';
+    
+    CHAT_HISTORY.push({ role: 'assistant', content: reply });
+    CALL.isProcessing = false;
+    
+    speakBangla(reply, function(){
+      setPandaState('idle');
+      // পান্ডু বলার পর অটো মাইক চালু
+      if(CALL.active){
+        setTimeout(function(){
+          if(CALL.active && !CALL.isProcessing) startListening();
+        }, 500);
+      }
+    });
+  }).catch(function(err){
+    console.error(err);
+    CALL.isProcessing = false;
+    var fallback = 'দুঃখিত, একটু সমস্যা হয়েছে। আবার বলবে?';
+    speakBangla(fallback, function(){
+      setPandaState('idle');
+      if(CALL.active){
+        setTimeout(function(){
+          if(CALL.active && !CALL.isProcessing) startListening();
+        }, 500);
+      }
+    });
+  });
+}
+
+/* ============================================================
+   Cloudflare Worker-এ AI কল
+   ============================================================ */
+function callAI(messages){
+  var apiMessages = [{ role: 'system', content: PANDU_SYSTEM }].concat(messages);
+  
+  return fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: apiMessages })
+  })
+  .then(function(res){
+    if(!res.ok){
+      return res.text().then(function(txt){
+        throw new Error('HTTP ' + res.status + ': ' + (txt.substring(0, 150) || 'Unknown'));
+      });
+    }
+    return res.json();
+  })
+  .then(function(data){
+    if(data && data.choices && data.choices[0] && data.choices[0].message){
+      return data.choices[0].message.content.trim();
+    }
+    if(data && data.error) throw new Error(data.error.message || 'AI error');
+    throw new Error('উত্তর পাওয়া যায়নি');
+  });
+}
+
+/* ============================================================
+   স্পিকার টগল
+   ============================================================ */
+function toggleSpeaker(){
+  CALL.speakerOn = !CALL.speakerOn;
+  var btn = document.getElementById('speakerBtn');
+  var icon = document.getElementById('speakerIcon');
+  
+  if(CALL.speakerOn){
+    btn.classList.remove('muted');
+    icon.className = 'fas fa-volume-up';
+    showToast('🔊 স্পিকার চালু', 'success');
+  } else {
+    btn.classList.add('muted');
+    icon.className = 'fas fa-volume-mute';
+    if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if(CURRENT_AUDIO) CURRENT_AUDIO.pause();
+    showToast('🔇 স্পিকার বন্ধ', 'success');
+  }
+}
+
+/* ============================================================
+   Toast & Modal
+   ============================================================ */
+var TOAST_TIMER = null;
+function showToast(msg, type){
+  var t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.className = 'toast';
+  if(type) t.classList.add(type);
+  t.classList.add('show');
+  clearTimeout(TOAST_TIMER);
+  TOAST_TIMER = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+function showModal(icon, title, text){
+  document.getElementById('modalIcon').textContent = icon;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').textContent = text;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+}
+
+/* ============================================================
+   ইনিশিয়ালাইজ
+   ============================================================ */
+(function(){
+  setTimeout(function(){
+    var splash = document.getElementById('splash');
+    if(splash) splash.classList.add('hide');
+    setTimeout(function(){
+      if(splash) splash.remove();
+      document.getElementById('app').classList.add('active');
+    }, 800);
+  }, 2400);
+  
+  if('speechSynthesis' in window){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function(){};
+  }
+  
+  document.getElementById('homeScreen').style.display = 'flex';
+  
+  console.log('🐼 পান্ডু প্রস্তুত!');
+  console.log('Worker:', WORKER_URL);
+})();
+
+window.addEventListener('beforeunload', function(){ saveHistory(); });
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden && CALL.active){
+    if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if(CURRENT_AUDIO) CURRENT_AUDIO.pause();
+  }
+});
+</script>
+</body>
+</html>
